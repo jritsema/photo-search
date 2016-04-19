@@ -1,0 +1,20 @@
+elasticsearch-1:
+  image: rpidockers/elasticsearch:1.7.1
+  container_name: elasticsearch-1
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+  volumes:
+    - ./elasticsearch:/data
+
+kibana-frontend:
+  image: rpidockers/kibana:4.1.2
+  container_name: kibana-frontend
+  volumes:
+    - ./elasticsearch:/data
+  ports:
+    - "5601:5601"
+  links:
+    - elasticsearch-1:elasticsearch
+  environment:
+    - ELASTICSEARCH=elasticsearch-1:9200

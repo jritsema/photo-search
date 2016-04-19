@@ -1,0 +1,15 @@
+{
+  "name": "photo-search",
+  "version": "0.0.1",
+  "description": "An experimental project for creating a powerful search engine for my personal photo collection.",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "jritsema",
+  "license": "ISC",
+  "dependencies": {
+    "elasticsearch": "^11.0.1",
+    "exif2": "0.0.1",
+    "walk": "^2.3.9"
+  }
+}
