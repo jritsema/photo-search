@@ -10,6 +10,7 @@
   "dependencies": {
     "elasticsearch": "^11.0.1",
     "exif2": "0.0.1",
+    "minimist": "^1.2.0",
     "walk": "^2.3.9"
   }
 }
