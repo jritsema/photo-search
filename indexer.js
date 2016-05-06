@@ -1,5 +1,5 @@
 //adapted from https://github.com/jettro/nodejs-photo-indexer
-//usage:  node indexer.js --photodir /Volumes/photos --hostandport es-instance:9200
+//usage:  node indexer.js --photodir /Volumes/Photos --hostandport es-instance:9200
 
 'use strict';
 
@@ -10,8 +10,8 @@ var exif = require('exif2');
 var readline = require('readline');
 var elasticsearch = require('elasticsearch')
 var argv = require('minimist')(process.argv.slice(2));
+var mapping = require('./mapping.json');
 
-var suffix = ".jpg";
 var startDir = argv.photodir;
 var esFlushBufferLength = 100;
 var hostAndPort = argv.hostandport;
@@ -30,64 +30,10 @@ client.indices.create({
   ignore: [400] //This lets us ignore the error when the index already exists.
 }).then(
   function(body) {
+    mapping.index = indexName;
+    mapping.type = docType;
     console.log("create index!");
-    //todo: read this from a seperate file
-    client.indices.putMapping({
-      index: indexName,
-      type: docType,
-      body: {
-        "photo": {
-          "_all": {
-            "enabled": true
-          },
-          "properties": {
-            "file_name": {
-              "type": "string",
-              "index": "not_analyzed"
-            },
-            "name": {
-              "type": "string",
-              "index": "not_analyzed"
-            },
-            "camera": {
-              "type": "string",
-              "analyzer": "english",
-              "fields": {
-                "raw": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                }
-              }
-            },
-            "lens": {
-              "type": "string",
-              "index": "not_analyzed"
-            },
-            "dateTaken": {
-              "type": "date",
-              "format": "yyyy:MM:dd HH:mm:ss||yyyy:MM:dd HH:mm:ss.SS||yyyy:MM:dd HH:mm||yyyy:MM:dd HH:mm:ss.SSS"
-            },
-            "iso": {
-              "type": "integer"
-            },
-            "focalLength": {
-              "type": "string",
-              "analyzer": "english",
-              "fields": {
-                "raw": {
-                  "type": "string",
-                  "index": "not_analyzed"
-                }
-              }
-            },
-            "location": {
-              "type": "geo_point"
-            }
-
-          }
-        }
-      }
-    }).then(function(body) {
+    client.indices.putMapping(mapping).then(function(body) {
       console.log("Put mapping !");
     }, function(err) {
       console.log(err);
@@ -104,7 +50,8 @@ var walker = walk.walk(startDir);
 walker.on('file', function(root, stat, next) {
   console.log("Walk " + stat.name);
   // Add this file to the list of files
-  if (strEndsWith(stat.name.toLowerCase(), suffix)) {
+  var name = stat.name.toLowerCase();
+  if (name.indexOf('.jpg') > -1 || name.indexOf('.jpeg') > -1) {
     extractData(root + '/' + stat.name, next);
   }
   next();
@@ -119,8 +66,8 @@ walker.on('end', function() {
     output: process.stdout
   });
 
-  rl.question("What do you think of node.js? ", function(answer) {
-    console.log("Thank you for your valuable feedback:", answer);
+  rl.question('***********************************************', function(answer) {
+    console.log('', answer);
     rl.close();
     flushItems(items);
     console.log("We are done!");
@@ -142,22 +89,23 @@ function extractData(file) {
       //console.log(obj);
       var searchObj = {};
       searchObj.id = file;
-      //We want something guranteed to be unqiue here like a primary key but this works.
-      searchObj.tags = obj['xp keywords'];
-      searchObj.orientation = obj["orientation"];
-      searchObj.flash = obj["flash"];
-      searchObj.lens = obj["lens"];
-      searchObj.aperture = obj["aperture"];
-      searchObj.megapixels = obj["megapixels"];
+
+      searchObj.tags = obj['subject'];
+      searchObj.people = obj['region name'];
+      searchObj.dateTaken = obj["create date"];
       searchObj.file_name = obj["file name"];
       searchObj.directory = obj["directory"];
       searchObj.file_size = obj["file size"];
       searchObj.make = obj["make"];
       searchObj.camera_model_name = obj["camera model name"];
+      searchObj.orientation = obj["orientation"];
+      searchObj.flash = obj["flash"];
+      searchObj.lens = obj["lens"];
+      searchObj.aperture = obj["aperture"];
+      searchObj.megapixels = obj["megapixels"];
       searchObj.x_resolution = obj["x resolution"];
       searchObj.y_resolution = obj["y resolution"];
       searchObj.resolution_unit = obj["resolution unit"];
-      searchObj.dateTaken = obj["create date"];
       searchObj.focal_length = obj["focal length"];
       searchObj.focus_position = obj["focus position"];
       searchObj.focus_distance = obj["focus distance"];
@@ -190,11 +138,6 @@ function extractData(file) {
   //   sendToElasticsearch(searchObj);
   // });
 };
-
-// Some Utility functions
-function strEndsWith(str, suffix) {
-  return str.match(suffix + "$") == suffix;
-}
 
 // Convert from GPS Degrees in EXIF to Degree Decimal so the ES understands the GPS
 function gpstodd(input) {
@@ -245,6 +188,7 @@ function sendToElasticsearch(searchObj) {
     "doc": searchObj,
     "doc_as_upsert": true
   });
+
   //console.log(items);
   if (items.length >= 100) {
     var new_items = items

@@ -1,0 +1,55 @@
+{
+  "index": "",
+  "type": "",
+  "body": {
+    "photo": {
+      "_all": {
+        "enabled": true
+      },
+      "properties": {
+        "file_name": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "name": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "camera": {
+          "type": "string",
+          "analyzer": "english",
+          "fields": {
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "lens": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "dateTaken": {
+          "type": "date",
+          "format": "yyyy:MM:dd HH:mm:ss||yyyy:MM:dd HH:mm:ss.SS||yyyy:MM:dd HH:mm||yyyy:MM:dd HH:mm:ss.SSS"
+        },
+        "iso": {
+          "type": "integer"
+        },
+        "focalLength": {
+          "type": "string",
+          "analyzer": "english",
+          "fields": {
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "location": {
+          "type": "geo_point"
+        }
+      }
+    }
+  }
+}
