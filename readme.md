@@ -21,13 +21,13 @@ First, stand up an Elasticsearch/Kibana instance.  You can run it in the cloud, 
 $ docker-compose up
 ```
 
-Next, index your photo collection by uploading the metadata into Elasticsearch.
+Next, index your photo collection by uploading the metadata into Elasticsearch. This requires exiftool to be installed.
 
 ```bash
 $ node . --photodir /path/to/photos --hostandport es-instance:9200
 ```
 
-Run a web server that can generate image thumbnails.
+Run a web server that can generate image thumbnails. This requires imagemagick to be installed.
 
 ```bash
 $ node thumbnail-server.js /path/to/photos
