@@ -33,7 +33,7 @@ Run a web server that can generate image thumbnails.
 $ node thumbnail-server.js /path/to/photos
 ```
 
-Now, in Kibana, you can configure the 'path' field in the photo index to be formatted as a URL using the Image type with the following Url Template.
+Now, in Kibana, you can configure the "path" field in the "photos" index to be formatted as a URL using the Image type with the following Url Template.
 
 ```
 http://ip-of-thumbnail-server:3000{{rawValue}}?dim=200x115
