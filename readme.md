@@ -15,7 +15,13 @@ Most of the cloud providers are starting to provide these types of features, but
 
 **Usage**
 
-First, index your photo collection by uploading the metadata into Elasticsearch.
+First, stand up an Elasticsearch/Kibana instance.  You can run it in the cloud, install it yourself, or run it in docker on your [laptop](docker-compose.yml), or even on your [raspberry pi](docker-compose-rpi.yml).
+
+```bash
+$ docker-compose up
+```
+
+Next, index your photo collection by uploading the metadata into Elasticsearch.
 
 ```bash
 $ node . --photodir /path/to/photos --hostandport es-instance:9200
@@ -33,8 +39,4 @@ Now, in Kibana, you can configure the 'path' field in the photo index to be form
 http://ip-of-thumbnail-server:3000{{rawValue}}?dim=200x115
 ```
 
-Note that it's possible to run elasticsearch/kibana on a raspberry pi using the included docker-compose.yml file...
-
-```bash
-$ docker-compose --file rpi-docker-compose.yml up
-```
+That's it. Now in Kibana, you can issue exhaustive metadata searches and display the matching images. Enjoy.

@@ -1,0 +1,20 @@
+#Building a photosearch with Elastic Search 
+#Read more at: http://blog.sandeepchivukula.com/
+
+elasticsearch-1:
+     image: elasticsearch
+     container_name: elasticsearch-1
+     ports:
+        - "9200:9200"
+        - "9300:9300"
+     volumes:
+        - ./data/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+     command: elasticsearch
+
+kibana-frontend:
+     image: kibana:latest
+     container_name: kibana-frontend
+     ports:
+        - "5601:5601"
+     links:
+       - elasticsearch-1:elasticsearch
