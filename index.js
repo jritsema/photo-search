@@ -1,5 +1,5 @@
 //adapted from https://github.com/jettro/nodejs-photo-indexer
-//usage:  node indexer.js --photodir /Volumes/Photos --hostandport es-instance:9200
+//usage:  node . --photodir /Volumes/Photos --hostandport es-instance:9200
 
 'use strict';
 
@@ -95,6 +95,7 @@ function extractData(file) {
       searchObj.dateTaken = obj["create date"];
       searchObj.file_name = obj["file name"];
       searchObj.directory = obj["directory"];
+      searchObj.path = obj["directory"] + '/' + obj["file name"];
       searchObj.file_size = obj["file size"];
       searchObj.make = obj["make"];
       searchObj.camera_model_name = obj["camera model name"];

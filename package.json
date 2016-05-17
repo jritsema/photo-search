@@ -1,7 +1,7 @@
 {
   "name": "photo-search",
   "version": "0.0.1",
-  "description": "An experimental project for creating a powerful search engine for my personal photo collection.",
+  "description": "An experimental project for creating a powerful search engine for a personal photo collection.",
   "main": "index.js",
   "scripts": {},
   "keywords": [],
@@ -11,6 +11,7 @@
     "elasticsearch": "^11.0.1",
     "exif2": "0.0.1",
     "minimist": "^1.2.0",
+    "quickthumb": "0.0.12",
     "walk": "^2.3.9"
   }
 }
