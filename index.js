@@ -29,17 +29,17 @@ client.indices.create({
   body: {},
   ignore: [400] //This lets us ignore the error when the index already exists.
 }).then(
-  function(body) {
+  function (body) {
     mapping.index = indexName;
     mapping.type = docType;
     console.log("create index!");
-    client.indices.putMapping(mapping).then(function(body) {
+    client.indices.putMapping(mapping).then(function (body) {
       console.log("Put mapping !");
-    }, function(err) {
+    }, function (err) {
       console.log(err);
     });
   },
-  function(err) {
+  function (err) {
     console.error(err);
   }
 );
@@ -47,41 +47,43 @@ client.indices.create({
 // Go through each directory and extract data
 var walker = walk.walk(startDir);
 
-walker.on('file', function(root, stat, next) {
+walker.on('file', function (root, stat, next) {
   console.log("Walk " + stat.name);
   // Add this file to the list of files
   var name = stat.name.toLowerCase();
   if (name.indexOf('.jpg') > -1 || name.indexOf('.jpeg') > -1) {
     extractData(root + '/' + stat.name, next);
+  } else {
+    next();
   }
-  next();
 });
 
-//Add a user input so that we wait for the extraction processes to finish
-//before flushing into the index
-walker.on('end', function() {
+// prompt();
 
+function prompt() {
   var rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
 
-  rl.question('***********************************************', function(answer) {
+  rl.question('***********************************************', function (answer) {
     console.log('', answer);
     rl.close();
     flushItems(items);
     console.log("We are done!");
   });
+}
 
-});
-
+//Add a user input so that we wait for the extraction processes to finish
+//before flushing into the index
+walker.on('end', prompt);
 
 /* This is the core work horse that calls the
 functions to get the data from the images an add
 it to a search object */
 function extractData(file) {
 
-  exif(file, function(err, obj) {
+  exif(file, function (err, obj) {
     if (err) {
       console.error(err);
     }
@@ -123,21 +125,6 @@ function extractData(file) {
       sendToElasticsearch(searchObj);
     }
   });
-
-  // getPalette(file, function(colors) {
-  //   var searchObj = {}
-  //   searchObj.id = file;
-  //   searchObj.colors = []
-  //   colors.forEach(function(color) {
-  //     searchObj.colors.push({
-  //       "h": color[0],
-  //       "s": color[1],
-  //       "v": color[2]
-  //     })
-  //
-  //   });
-  //   sendToElasticsearch(searchObj);
-  // });
 };
 
 // Convert from GPS Degrees in EXIF to Degree Decimal so the ES understands the GPS
@@ -153,29 +140,6 @@ function gpstodd(input) {
   }
 }
 
-// // Get Color information from the photos
-// var getPalette = function(file, callback) {
-//   //from https://github.com/tj/palette
-//   var convert = require('color-convert'),
-//     palette = require('palette'),
-//     Canvas = require('canvas');
-//
-//   var img = new Canvas.Image;
-//   img.src = file;
-//   var canvas = new Canvas(img.width, img.height);
-//   var ctx = canvas.getContext('2d');
-//   ctx.drawImage(img, 0, 0, img.width / 4, img.height / 4);
-//
-//   var colors = palette(canvas);
-//   var output = []
-//
-//   colors.forEach(function(color) {
-//     output.push(convert.rgb.hsv(color))
-//   })
-//
-//   callback(output);
-// };
-
 //Collect and Flsuh using the Bulk Index
 function sendToElasticsearch(searchObj) {
   console.log("Sending to elastic");
@@ -186,9 +150,9 @@ function sendToElasticsearch(searchObj) {
       "_id": searchObj.id
     }
   }, {
-    "doc": searchObj,
-    "doc_as_upsert": true
-  });
+      "doc": searchObj,
+      "doc_as_upsert": true
+    });
 
   //console.log(items);
   if (items.length >= 100) {
@@ -205,7 +169,7 @@ function flushItems(new_items) {
     index: indexName,
     type: docType,
     body: new_items
-  }, function(err, response) {
+  }, function (err, response) {
     if (err) console.error(err);
     console.log(response);
   });
