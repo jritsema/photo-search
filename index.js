@@ -58,34 +58,20 @@ walker.on('file', function (root, stat, next) {
   }
 });
 
-// prompt();
-
-function prompt() {
-  var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  rl.question('***********************************************', function (answer) {
-    console.log('', answer);
-    rl.close();
-    flushItems(items);
-    console.log("We are done!");
-  });
-}
-
-//Add a user input so that we wait for the extraction processes to finish
-//before flushing into the index
-walker.on('end', prompt);
+walker.on('end', function() {
+  flushItems(items);
+  console.log('done!!!!!!');
+});
 
 /* This is the core work horse that calls the
 functions to get the data from the images an add
 it to a search object */
-function extractData(file) {
+function extractData(file, next) {
 
   exif(file, function (err, obj) {
     if (err) {
       console.error(err);
+      next();
     }
     else {
       //console.log(obj);
@@ -122,7 +108,7 @@ function extractData(file) {
       searchObj.gps_altitude = obj["gps altitude"];
       obj["gps position"] > "" ? searchObj.location = gpstodd(obj["gps position"]) : 1;
 
-      sendToElasticsearch(searchObj);
+      sendToElasticsearch(searchObj, next);
     }
   });
 };
@@ -141,7 +127,7 @@ function gpstodd(input) {
 }
 
 //Collect and Flsuh using the Bulk Index
-function sendToElasticsearch(searchObj) {
+function sendToElasticsearch(searchObj, next) {
   console.log("Sending to elastic");
 
   //We'll do an upsert here b/c we don't which feature will return first
@@ -157,13 +143,13 @@ function sendToElasticsearch(searchObj) {
   //console.log(items);
   if (items.length >= 100) {
     var new_items = items
-    flushItems(new_items);
+    flushItems(new_items, next);
     new_items = [];
     items = [];
   }
 }
 
-function flushItems(new_items) {
+function flushItems(new_items, next) {
   console.log("Flushing items");
   client.bulk({
     index: indexName,
@@ -172,5 +158,6 @@ function flushItems(new_items) {
   }, function (err, response) {
     if (err) console.error(err);
     console.log(response);
+    next();
   });
 }
