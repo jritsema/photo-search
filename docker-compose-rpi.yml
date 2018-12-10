@@ -1,20 +1,21 @@
-elasticsearch-1:
-  image: rpidockers/elasticsearch:1.7.1
-  container_name: elasticsearch-1
+elasticsearch:
+  image: jritsema/rpi-elasticsearch:2.4.0
+  volumes:
+    - ./elasticsearch:/data
   ports:
     - "9200:9200"
     - "9300:9300"
-  volumes:
-    - ./elasticsearch:/data
+  environment:
+    - CLUSTER_NAME=my-cluster
+    - LISTEN=0.0.0.0
+  restart: always
 
-kibana-frontend:
-  image: rpidockers/kibana:4.1.2
-  container_name: kibana-frontend
+kibana:
+  image: jritsema/rpi-kibana:4.6.1
   volumes:
-    - ./elasticsearch:/data
+    - ./kibana/config/:/opt/kibana/config/
   ports:
     - "5601:5601"
   links:
-    - elasticsearch-1:elasticsearch
-  environment:
-    - ELASTICSEARCH=elasticsearch-1:9200
+    - elasticsearch
+  restart: always

@@ -1,0 +1,22 @@
+FROM jritsema/rpi-node-piuserland:4.2.4
+
+ENV EXIFTOOL_VERSION=10.20
+RUN cd /tmp \
+	&& wget http://www.sno.phy.queensu.ca/~phil/exiftool/Image-ExifTool-${EXIFTOOL_VERSION}.tar.gz \
+	&& tar -zxvf Image-ExifTool-${EXIFTOOL_VERSION}.tar.gz \
+	&& cd Image-ExifTool-${EXIFTOOL_VERSION} \
+	&& perl Makefile.PL \
+	&& make install \
+	&& cd .. \
+	&& rm -rf Image-ExifTool-${EXIFTOOL_VERSION}
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY mapping.json /usr/src/app/
+COPY package.json /usr/src/app/
+ENV NPM_CONFIG_LOGLEVEL warn
+RUN npm install
+COPY . /usr/src/app
+
+ENTRYPOINT [ "node", "." ]
